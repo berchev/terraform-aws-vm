@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+which docker || {
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  sh get-docker.sh
+  groupadd docker
+  usermod -aG docker ubuntu
+}

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+#Debug mode enabled 
+#set -x
+
+#Install specific Sentiel version. Desired Version -> format x.y.z
+#export SENTINEL_VERSION='${sentinel_ver}'
+export SENTINEL_VERSION='${sentinel_ver}'
+
+[ -f "/usr/local/bin/sentinel" ] || {
+  pushd /usr/local/bin
+  SENTINEL_URL=$(curl -sL https://releases.hashicorp.com/sentinel/index.json | jq -r '.versions[].builds[].url' | egrep 'sentinel_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_linux.*amd64' | sort -V | grep $${SENTINEL_VERSION})
+  curl -o sentinel.zip $${SENTINEL_URL}
+  unzip sentinel.zip
+  rm -f sentinel.zip
+  popd
+}
+
+
+
+
