@@ -1,0 +1,33 @@
+#cloud-config
+packages:
+- curl
+- unzip
+- jq
+
+write_files:
+-   encoding: b64
+    content: ${tfc_agent_download_content}
+    owner: root:root
+    path: /tmp/tfc-agent-download.sh
+    permissions: '0644'
+-   encoding: b64
+    content: ${terraform_download_content}
+    owner: root:root
+    path: /tmp/terraform-download.sh
+    permissions: '0644'
+-   encoding: b64
+    content: ${sentinel_download_content}
+    owner: root:root
+    path: /tmp/sentinel-download.sh
+    permissions: '0644'
+-   encoding: b64
+    content: ${docker_download_content}
+    owner: root:root
+    path: /tmp/docker-download.sh
+    permissions: '0644'
+
+runcmd:
+- [ "/bin/bash", "/tmp/tfc-agent-download.sh" ]
+- [ "/bin/bash", "/tmp/terraform-download.sh" ]
+- [ "/bin/bash", "/tmp/sentinel-download.sh" ]
+- [ "/bin/bash", "/tmp/docker-download.sh" ]
