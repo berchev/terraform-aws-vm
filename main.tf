@@ -9,30 +9,30 @@ variable "security_group_name" {
 }
 
 variable "vm_type" {
-  default = "t2.small" #"t2.medium"
+  default = "t2.medium" #"t2.medium"
 }
 
 variable "vm_key_name" {
-  default = "georgiberchev"
+  default = "berchev"
 }
 
 
 variable "private_key_path" {
-  default = "/Users/georgiman/Dropbox/ec2_key_pair/georgiberchev.pem"
+  default = "/Users/berchev/.ssh/berchev.pem"
 }
 
 variable "tfca_version" {
-  default     = "1.8.0"
+  default     = "1.22.3"
   description = "Terraform Cloud Agent version"
 }
 
 variable "tf_cli_version" {
-  default     = "1.4.5"
+  default     = "1.12.1"
   description = "Terraform CLI version"
 }
 
 variable "sentinel_version" {
-  default     = "0.21.0"
+  default     = "0.40.0"
   description = "Sentinel version"
 }
 
@@ -42,7 +42,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "= 4.64.0"
+      version = "= 5.99.1"
     }
   }
 }
@@ -79,12 +79,12 @@ resource "aws_security_group_rule" "allow_ingress" {
 }
 ########################################################################
 #### AWS Virtual Machine code ####
-data "aws_ami" "ubuntu_focal" {
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 
   filter {
@@ -96,7 +96,7 @@ data "aws_ami" "ubuntu_focal" {
 }
 
 resource "aws_instance" "aws_terraform_vm" {
-  ami                         = data.aws_ami.ubuntu_focal.id
+  ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.vm_type
   key_name                    = var.vm_key_name
   vpc_security_group_ids      = [aws_security_group.terraform_vm_sg.id]
