@@ -1,40 +1,60 @@
 ##### Variables ####
-##### Change values if necessary #### 
+
+##### SSH key pair #####
+# SSH key created beforehand on your computer
+
+variable "key_name" {
+  type    = string
+  default = "aws-ssh-key-terraform"
+}
+
+variable "public_ssh_key_path" {
+  type    = string
+  default = "/Users/berchev/.ssh/aws-ssh-key-terraform.pub"
+}
+
+variable "private_ssh_key_path" {
+  type    = string
+  default = "/Users/berchev/.ssh/aws-ssh-key-terraform"
+}
+
+ 
+##### Desired AWS region and tools versions ####
 variable "region" {
+  type    = string
   default = "us-east-1"
 }
 
-variable "security_group_name" {
-  default = "terraform_vm_sg"
-}
-
-variable "vm_type" {
-  default = "t2.medium" #"t2.medium"
-}
-
-variable "vm_key_name" {
-  default = "berchev"
-}
-
-
-variable "private_key_path" {
-  default = "/Users/berchev/.ssh/berchev.pem"
-}
-
 variable "tfca_version" {
-  default     = "1.22.3"
+  type    = string
+  default     = "1.34.0"
   description = "Terraform Cloud Agent version"
 }
 
 variable "tf_cli_version" {
-  default     = "1.12.1"
+  type    = string
+  default     = "1.17.2"
   description = "Terraform CLI version"
 }
 
 variable "sentinel_version" {
+  type    = string
   default     = "0.40.0"
   description = "Sentinel version"
 }
+
+########################################
+
+variable "security_group_name" {
+  type    = string
+  default = "terraform_vm_sg"
+}
+
+variable "vm_type" {
+  type    = string
+  default = "t2.medium"
+}
+
 
 #### Code Begin ####
 #### Provider definition code ####
@@ -42,7 +62,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "= 5.99.1"
+      version = "= 6.63.0"
     }
   }
 }
@@ -52,6 +72,12 @@ provider "aws" {
 }
 
 ########################################################################
+
+resource "aws_key_pair" "terraform_vm" {
+  key_name   = var.key_name
+  public_key = file(var.public_ssh_key_path)
+}
+
 #### Security group code ####
 resource "aws_security_group" "terraform_vm_sg" {
   name        = var.security_group_name
@@ -98,7 +124,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "aws_terraform_vm" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.vm_type
-  key_name                    = var.vm_key_name
+  key_name                    = aws_key_pair.terraform_vm.key_name
   vpc_security_group_ids      = [aws_security_group.terraform_vm_sg.id]
   associate_public_ip_address = true
   user_data_base64 = base64encode(templatefile("${path.root}/config/cloud-init.tmpl", {
@@ -131,5 +157,5 @@ output "public_dns" {
 }
 
 output "ssh" {
-  value = "ssh -i ${var.private_key_path} ubuntu@${aws_instance.aws_terraform_vm.public_dns}"
+  value = "ssh -i ${var.private_ssh_key_path} ubuntu@${aws_instance.aws_terraform_vm.public_dns}"
 }
